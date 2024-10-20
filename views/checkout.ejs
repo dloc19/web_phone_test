@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include ("./partials/_head") %>
+    <title>Ecommerce: Checkout</title>
+    <link rel="icon" href="../public/imgs/nodejs-logo.png" />
+    <link href="/public/css/main.css" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <!-- fontawesome cdn -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- owl carousel -->
+    <link rel="stylesheet" href="public/owl_carousel/owl.carousel.css" />
+    <link rel="stylesheet" href="public/owl_carousel/owl.theme.default.css" />
+    <!-- custom css -->
+    <link rel="stylesheet" href="public/products/style.css" />
+    <link rel="stylesheet" href="public/products/checkout.css" />
+  </head>
+
+  <body>
+    <%- include ("./partials/_nav") %>
+        <% if (typeof (result) != "undefined") { %> 
+            <% result.forEach(r => { %>
+                <div class="container1 d-lg-flex">
+                    <div class="box-1 bg-light user">
+                        <div class="box-inner-1 pb-3 mb-3 ">
+                            <div class="d-flex justify-content-between mb-3 userdetails">
+                                <p class="fw-bold">Product Details</p>
+                            </div>
+                            <img src="/public/uploads/<%= r.prod_img %>" class="d-block w-100" style="max-width: 300px; height: 250px;">
+                            <p class="dis info my-3" style="font-size: 15px;">Product: <strong><%= r.prod_name %></strong></p>
+                            <p class="dis info my-3" style="font-size: 15px;">Category: <strong><%= r.cat_name %></strong></p>
+                        </div>
+                    </div>
+                    <div class="box-2">
+                        <div class="box-inner-2">
+                            <div>
+                                <p class="fw-bold">Payment Details</p>
+                                <p class="dis mb-3">Complete your purchase by providing your payment details</p>
+                            </div>
+                            <form method="POST" action="/checkout">
+                                <div class="mb-3">
+                                    <p class="dis fw-bold mb-2">Email address</p>
+                                    <input type="hidden" name="c_product_id" value="<%= r.pid %>">
+                                    <input type="hidden" name="cart_id" value="<%= r.cart_id %>">
+                                    <input type="hidden" name="qty" value="<%= r.cqty %>">
+                                    <input type="hidden" name="payment" value="<%= r.cqty * r.prod_price %>">
+                                    <input class="form-control" type="email" readonly value="<%= r.username %>">
+                                </div>
+                                <div>
+                                    <div class="my-3 cardname">
+                                        <p class="dis fw-bold mb-2">Shipping Address</p>
+                                        <input class="form-control" readonly type="text" name="ship_addr" value="<%= r.addr %>">
+                                    </div>
+                                    <div class="address">
+                                        <div class="d-flex flex-column dis">
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <p class="dis info fw-bold" style="font-size: 15;">Product Price</p>
+                                                <p class="fw-bold"><%= r.prod_price %></p>
+                                            </div>
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <p class="dis info fw-bold" style="font-size: 15;">Product Quantity</p>
+                                                <p class="fw-bold"><%= r.cqty %></p>
+                                            </div>
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <p class="fw-bold">Total</p>
+                                                <p class="fw-bold">Php </span><%= r.cqty * r.prod_price %></p>
+                                            </div>
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <p class="fw-bold">Mode of Payment</p>
+                                                <p class="fw-bold">Cash on Delivery</p>
+                                            </div>
+                                            <input type="submit" name="submit" class="btn btn-primary mt-5" value="Checkout">
+                                            <a href="/cart" class="btn btn-default mt-2">Cancel</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        <% } %>
+    <%- include ("./partials/_footer") %>
+    <script src="/public/products/script.js"></script>
+  </body>
+</html>

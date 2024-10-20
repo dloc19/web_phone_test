@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Ecommerce: Manage Category</title>
+    <link rel="icon" href="../../public/imgs/nodejs-logo.png" />
+    <%- include ("./includes/_head") %>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/dataTables.bootstrap5.min.css"/>
+    <style>
+        #orders-table-tabs{
+            border-radius: 10px;
+        }
+    </style>
+  </head>
+  
+  <body class="app">
+    <%- include ("./includes/_nav") %>
+    <div class="app-wrapper">
+	    
+	    <div class="app-content pt-3 p-md-3 p-lg-4">
+		    <div class="container-xl">
+                <nav id="orders-table-tabs" class="orders-table-tabs app-nav-tabs nav shadow flex-column flex-sm-row mb-4">
+                    <a class="flex-sm-fill text-sm-center nav-link active" id="orders-pending-tab" data-bs-toggle="tab" href="#orders-pending" role="tab" aria-controls="orders-pending" aria-selected="true">Pending 
+                    </a>
+                    <a class="flex-sm-fill text-sm-center nav-link" id="orders-cancelled-tab" data-bs-toggle="tab" href="#orders-cancelled" role="tab" aria-controls="orders-cancelled" aria-selected="false">Cancelled 
+                    </a>
+                    <a class="flex-sm-fill text-sm-center nav-link"  id="orders-paid-tab" data-bs-toggle="tab" href="#orders-paid" role="tab" aria-controls="orders-paid" aria-selected="false">Approved     
+                    </a>
+                    <a class="flex-sm-fill text-sm-center nav-link" id="orders-all-tab" data-bs-toggle="tab" href="#orders-all" role="tab" aria-controls="orders-all" aria-selected="false">All 
+                    </a>
+                </nav>
+
+                <div class="tab-content" id="orders-table-tab-content">
+                    <% if ( typeof (approve) != "undefined" && approve) { %>
+                        <div class="alert alert-success alert-dismissible w-100 fade show" role="alert" >
+                          <%= approve %>
+                          <button type="button" class="btn-close" data-bs-dismiss="alert"  aria-label="Close">
+                          </button>
+                        </div>
+                      <% } %>
+                    <div class="tab-pane fade" id="orders-all" role="tabpanel" aria-labelledby="orders-all-tab">
+                        <div class="app-card app-card-orders-table shadow-sm mb-5">
+                            <div class="app-card-body p-4">
+                                <div class="table-responsive">
+                                    <table class="table app-table-hover mb-0 text-left" id="orders">
+                                        <thead>
+                                            <tr>
+                                                <th class="cell">#</th>
+                                                <th class="cell">Product</th>
+                                                <th class="cell">Customer</th>
+                                                <th class="cell">Order Date</th>
+                                                <th class="cell">Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% if (typeof (allresult) != "undefined") { %> 
+                                                <% var i = 1 %> 
+                                                <% allresult.forEach(ar => { %>
+                                                    <tr>
+                                                        <td class="cell"><%= i %></td>
+                                                        <td class="cell">
+                                                            <span class="truncate"><%= ar.prod_name %></span>
+                                                        </td>
+                                                        <td><%= ar.fullname %></td>
+                                                        <td class="cell"><%= moment(ar.order_date).format('MMMM DD, YYYY') %></td>
+                                                        <% if (ar.ord_stat == 1){ %>
+                                                            <td class="cell"><span class="badge bg-success">Approved</span></td>
+                                                        <% } else if(ar.ord_stat == 0) { %>
+                                                            <td class="cell"><span class="badge bg-warning">Pending</span></td>
+                                                        <% } else if(ar.ord_stat == 2) { %>
+                                                            <td class="cell"><span class="badge bg-danger">Cancelled</span></td>
+                                                        <% } %>
+                                                        <td>
+                                                            <i class="fa fa-eye text-info" aria-hidden="true" style="font-size: 15px;" data-bs-toggle="modal" data-bs-target="#aview<%= ar.order_id %>"></i>
+                                                        </td>
+                                                    </tr>
+                                                    <div
+                                                        class="modal fade"
+                                                        id="aview<%= ar.order_id %>"
+                                                        tabindex="-1"
+                                                        aria-labelledby="viewLabel"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                            <h5 class="modal-title" id="viewLabel">
+                                                                View Order: 
+                                                            </h5>
+                                                            <button
+                                                                type="button"
+                                                                class="btn-close"
+                                                                data-bs-dismiss="modal"
+                                                                aria-label="Close"
+                                                            ></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="justify-content-center container">
+                                                                    <div class="card p-3 bg-white">
+                                                                        <div class="about-product text-center mt-2">
+                                                                            <img src="/public/uploads/<%= ar.prod_img %>" width="300">
+                                                                            <div>
+                                                                                <h4><%= ar.prod_name %></h4>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="stats mt-2">
+                                                                            <div class="d-flex justify-content-between p-price"><span>Quantity</span><span><%= ar.qty %></span></div>
+                                                                        </div>
+                                                                        <div class="d-flex justify-content-between total font-weight-bold mt-4"><span>Total</span><span><%= ar.payment %></span></div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-secondary"
+                                                                data-bs-dismiss="modal"
+                                                            >
+                                                                Close
+                                                            </button>
+                                                            </div>
+                                                        </div>
+                                                        </div>
+                                                    </div>
+                                                    <% i++ %> 
+                                                <% }) %> 
+                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                </div><!--//table-responsive-->
+                            
+                            </div><!--//app-card-body-->		
+                        </div><!--//app-card-->
+                        
+                    </div><!--//tab-pane-->
+                    
+                    <div class="tab-pane fade" id="orders-paid" role="tabpanel" aria-labelledby="orders-paid-tab">
+                        <div class="app-card app-card-orders-table mb-5">
+                            <div class="app-card-body p-4">
+                                <div class="table-responsive">
+                                    <table class="table mb-0 text-left" id="orders">
+                                        <thead>
+                                            <tr>
+                                                <th class="cell">#</th>
+                                                <th class="cell">Product</th>
+                                                <th class="cell">Customer</th>
+                                                <th class="cell">Order Date</th>
+                                                <th class="cell">Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% if (typeof (accResult) != "undefined") { %> 
+                                                <% var j = 1 %> 
+                                                <% accResult.forEach(ac => { %>
+                                                    <tr>
+                                                        <td class="cell"><%= j %></td>
+                                                        <td class="cell">
+                                                            <span class="truncate"><%= ac.prod_name %></span>
+                                                        </td>
+                                                        <td><%= ac.fullname %></td>
+                                                        <td class="cell"><%= moment(ac.order_date).format('MMMM DD, YYYY') %></td>
+                                                        <td class="cell"><span class="badge bg-success">Approved</span></td>
+                                                        <td>
+                                                            <i class="fa fa-eye text-info" aria-hidden="true" style="font-size: 15px;" data-bs-toggle="modal" data-bs-target="#pview<%= ac.order_id %>"></i>
+                                                        </td>
+                                                    </tr>
+                                                    <div
+                                                        class="modal fade"
+                                                        id="pview<%= ac.order_id %>"
+                                                        tabindex="-1"
+                                                        aria-labelledby="viewLabel"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                <h5 class="modal-title" id="viewLabel">
+                                                                    View Order: 
+                                                                </h5>
+                                                                <button
+                                                                    type="button"
+                                                                    class="btn-close"
+                                                                    data-bs-dismiss="modal"
+                                                                    aria-label="Close"
+                                                                ></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="justify-content-center container">
+                                                                        <div class="card p-3 bg-white">
+                                                                            <div class="about-product text-center mt-2">
+                                                                                <img src="/public/uploads/<%= ac.prod_img %>" width="300">
+                                                                                <div>
+                                                                                    <h4><%= ac.prod_name %></h4>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="stats mt-2">
+                                                                                <div class="d-flex justify-content-between p-price"><span>Quantity</span><span><%= ac.qty %></span></div>
+                                                                            </div>
+                                                                            <div class="d-flex justify-content-between total font-weight-bold mt-4"><span>Total</span><span><%= ac.payment %></span></div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                <button
+                                                                    type="button"
+                                                                    class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal"
+                                                                >
+                                                                    Close
+                                                                </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <% j++ %> 
+                                                <% }) %> 
+                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                </div><!--//table-responsive-->
+                            </div><!--//app-card-body-->		
+                        </div><!--//app-card-->
+                    </div><!--//tab-pane-->
+                    
+                    <div class="tab-pane fade show active" id="orders-pending" role="tabpanel" aria-labelledby="orders-pending-tab">
+                        <div class="app-card app-card-orders-table mb-5">
+                            <div class="app-card-body p-4">
+                                <div class="table-responsive">
+                                    <table class="table mb-0 text-left" id="orders">
+                                        <thead>
+                                            <tr>
+                                                <th class="cell">#</th>
+                                                <th class="cell">Product</th>
+                                                <th class="cell">Customer</th>
+                                                <th class="cell">Order Date</th>
+                                                <th class="cell">Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% if (typeof (penResult) != "undefined") { %> 
+                                                <% var k = 1 %> 
+                                                <% penResult.forEach(pr => { %>
+                                                    <tr>
+                                                        <td class="cell"><%= k %></td>
+                                                        <td class="cell">
+                                                            <span class="truncate"><%= pr.prod_name %></span>
+                                                        </td>
+                                                        <td><%= pr.fullname %></td>
+                                                        <td class="cell"><%= moment(pr.order_date).format('MMMM DD, YYYY') %></td>
+                                                        <td class="cell"><span class="badge bg-warning">Pending</span></td>
+                                                        <td>
+                                                            <i class="fa fa-eye text-info" aria-hidden="true" style="font-size: 15px;" data-bs-toggle="modal" data-bs-target="#ppview<%= pr.order_id %>"></i>
+                                                            <i class="fa fa-check-circle text-success" aria-hidden="true"style="font-size: 15px;" data-bs-toggle="modal" data-bs-target="#ppapprove<%= pr.order_id %>"></i>
+                                                            <i class="fa fa-times-circle text-danger" aria-hidden="true"style="font-size: 15px;" data-bs-toggle="modal" data-bs-target="#ppcancel<%= pr.order_id %>"></i>
+                                                        </td>
+                                                    </tr>
+                                                    <div
+                                                        class="modal fade"
+                                                        id="ppview<%= pr.order_id %>"
+                                                        tabindex="-1"
+                                                        aria-labelledby="viewLabel"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                <h5 class="modal-title" id="viewLabel">
+                                                                    View Order: 
+                                                                </h5>
+                                                                <button
+                                                                    type="button"
+                                                                    class="btn-close"
+                                                                    data-bs-dismiss="modal"
+                                                                    aria-label="Close"
+                                                                ></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="justify-content-center container">
+                                                                        <div class="card p-3 bg-white">
+                                                                            <div class="about-product text-center mt-2">
+                                                                                <img src="/public/uploads/<%= pr.prod_img %>" width="300">
+                                                                                <div>
+                                                                                    <h4><%= pr.prod_name %></h4>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="stats mt-2">
+                                                                                <div class="d-flex justify-content-between p-price"><span>Quantity</span><span><%= pr.qty %></span></div>
+                                                                            </div>
+                                                                            <div class="d-flex justify-content-between total font-weight-bold mt-4"><span>Total</span><span><%= pr.payment %></span></div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                <button
+                                                                    type="button"
+                                                                    class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal"
+                                                                >
+                                                                    Close
+                                                                </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        class="modal fade"
+                                                        id="ppapprove<%= pr.order_id %>"
+                                                        tabindex="-1"
+                                                        aria-labelledby="viewLabel"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                <h5 class="modal-title" id="viewLabel">
+                                                                    Confirm Order Approval: 
+                                                                </h5>
+                                                                <button
+                                                                    type="button"
+                                                                    class="btn-close"
+                                                                    data-bs-dismiss="modal"
+                                                                    aria-label="Close"
+                                                                ></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="justify-content-center container">
+                                                                        <div class="card p-3 bg-white">
+                                                                            <div class="about-product text-center mt-2">
+                                                                                <img src="/public/uploads/<%= pr.prod_img %>" width="300">
+                                                                                <div>
+                                                                                    <h4><%= pr.prod_name %></h4>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="stats mt-2">
+                                                                                <div class="d-flex justify-content-between p-price"><span>Quantity</span><span><%= pr.qty %></span></div>
+                                                                            </div>
+                                                                            <div class="d-flex justify-content-between total font-weight-bold mt-4"><span>Total</span><span><%= pr.payment %></span></div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <form method="POST">
+                                                                        <input type="hidden" name="order_id" value="<%= pr.order_id %>">
+                                                                        <input type="hidden" name="order_prod_id" value="<%= pr.opid %>">
+                                                                        <input type="hidden" name="order_qty" value="<%= pr.qty %>">
+                                                                        <input type="hidden" name="confirm_approve" value="1">
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                            Close
+                                                                        </button>
+                                                                        <input type="submit" class="btn btn-success text-white" name="confirm" value="Confirm">
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        class="modal fade"
+                                                        id="ppcancel<%= pr.order_id %>"
+                                                        tabindex="-1"
+                                                        aria-labelledby="viewLabel"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                <h5 class="modal-title" id="viewLabel">
+                                                                    Confirm Order Cancellation: 
+                                                                </h5>
+                                                                <button
+                                                                    type="button"
+                                                                    class="btn-close"
+                                                                    data-bs-dismiss="modal"
+                                                                    aria-label="Close"
+                                                                ></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="justify-content-center container">
+                                                                        <div class="card p-3 bg-white">
+                                                                            <div class="about-product text-center mt-2">
+                                                                                <img src="/public/uploads/<%= pr.prod_img %>" width="300">
+                                                                                <div>
+                                                                                    <h4><%= pr.prod_name %></h4>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="stats mt-2">
+                                                                                <div class="d-flex justify-content-between p-price"><span>Quantity</span><span><%= pr.qty %></span></div>
+                                                                            </div>
+                                                                            <div class="d-flex justify-content-between total font-weight-bold mt-4"><span>Total</span><span><%= pr.payment %></span></div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <form method="POST">
+                                                                        <input type="hidden" name="c_order_id" value="<%= pr.order_id %>">
+                                                                        <input type="hidden" name="confirm_cancel" value="1">
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                            Close
+                                                                        </button>
+                                                                        <input type="submit" class="btn btn-danger text-white" name="cancel" value="Confirm">
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <% k++ %> 
+                                                <% }) %> 
+                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                </div><!--//table-responsive-->
+                            </div><!--//app-card-body-->		
+                        </div><!--//app-card-->
+                    </div><!--//tab-pane-->
+                    <div class="tab-pane fade" id="orders-cancelled" role="tabpanel" aria-labelledby="orders-cancelled-tab">
+                        <div class="app-card app-card-orders-table mb-5">
+                            <div class="app-card-body p-4">
+                                <div class="table-responsive">
+                                    <table class="table mb-0 text-left" id="orders">
+                                        <thead>
+                                            <tr>
+                                                <th class="cell">#</th>
+                                                <th class="cell">Product</th>
+                                                <th class="cell">Customer</th>
+                                                <th class="cell">Order Date</th>
+                                                <th class="cell">Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% if (typeof (canResult) != "undefined") { %> 
+                                                <% var l = 1 %> 
+                                                <% canResult.forEach(cr => { %>
+                                                    <tr>
+                                                        <td class="cell"><%= l %></td>
+                                                        <td class="cell">
+                                                            <span class="truncate"><%= cr.prod_name %></span>
+                                                        </td>
+                                                        <td><%= cr.fullname %></td>
+                                                        <td class="cell"><%= moment(cr.order_date).format('MMMM DD, YYYY') %></td>
+                                                        <td class="cell"><span class="badge bg-danger">Cancelled</span></td>
+                                                        <td>
+                                                            <i class="fa fa-eye text-info" aria-hidden="true" style="font-size: 15px;" data-bs-toggle="modal" data-bs-target="#cview<%= cr.order_id %>"></i>
+                                                        </td>
+                                                    </tr>
+                                                    <div
+                                                        class="modal fade"
+                                                        id="cview<%= cr.order_id %>"
+                                                        tabindex="-1"
+                                                        aria-labelledby="viewLabel"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                <h5 class="modal-title" id="viewLabel">
+                                                                    View Order: 
+                                                                </h5>
+                                                                <button
+                                                                    type="button"
+                                                                    class="btn-close"
+                                                                    data-bs-dismiss="modal"
+                                                                    aria-label="Close"
+                                                                ></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="justify-content-center container">
+                                                                        <div class="card p-3 bg-white">
+                                                                            <div class="about-product text-center mt-2">
+                                                                                <img src="/public/uploads/<%= cr.prod_img %>" width="300">
+                                                                                <div>
+                                                                                    <h4><%= cr.prod_name %></h4>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="stats mt-2">
+                                                                                <div class="d-flex justify-content-between p-price"><span>Quantity</span><span><%= cr.qty %></span></div>
+                                                                            </div>
+                                                                            <div class="d-flex justify-content-between total font-weight-bold mt-4"><span>Total</span><span><%= cr.payment %></span></div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                <button
+                                                                    type="button"
+                                                                    class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal"
+                                                                >
+                                                                    Close
+                                                                </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <% l++ %> 
+                                                <% }) %> 
+                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                </div><!--//table-responsive-->
+                            </div><!--//app-card-body-->		
+                        </div><!--//app-card-->
+                    </div><!--//tab-pane-->
+                </div>
+		    </div><!--//container-fluid-->
+	    </div><%- include ("./includes/_footer") %>
+        </div>
+      </div>
+       
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("*#orders").DataTable({
+            "ordering": false
+        });
+      });
+    </script>
+   
+  </body>
+</html>

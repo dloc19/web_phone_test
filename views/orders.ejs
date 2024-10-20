@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include ("./partials/_head") %>
+    <title>Ecommerce: Orders</title>
+    <link rel="icon" href="../public/imgs/nodejs-logo.png" />
+    <link href="/public/css/main.css" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.11.4/css/dataTables.bootstrap5.min.css"
+    />
+    <!-- fontawesome cdn -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- owl carousel -->
+    <link rel="stylesheet" href="public/owl_carousel/owl.carousel.css" />
+    <link rel="stylesheet" href="public/owl_carousel/owl.theme.default.css" />
+    <!-- custom css -->
+    <link rel="stylesheet" href="public/products/style.css" />
+    <link rel="stylesheet" href="public/products/checkout.css" />
+  </head>
+
+  <body>
+    <%- include ("./partials/_nav") %>
+    <div class="container mt-5">
+        <nav id="orders-table-tab" class="orders-table-tab app-nav-tabs nav shadow-sm flex-column flex-sm-row mb-4">
+            <a class="flex-sm-fill text-sm-center nav-link active" id="orders-all-tab" data-bs-toggle="tab" href="#orders-all" role="tab" aria-controls="orders-all" aria-selected="true">All</a>
+            <a class="flex-sm-fill text-sm-center nav-link"  id="orders-paid-tab" data-bs-toggle="tab" href="#orders-paid" role="tab" aria-controls="orders-paid" aria-selected="false">Approved</a>
+            <a class="flex-sm-fill text-sm-center nav-link" id="orders-pending-tab" data-bs-toggle="tab" href="#orders-pending" role="tab" aria-controls="orders-pending" aria-selected="false">Pending</a>
+            <a class="flex-sm-fill text-sm-center nav-link" id="orders-cancelled-tab" data-bs-toggle="tab" href="#orders-cancelled" role="tab" aria-controls="orders-cancelled" aria-selected="false">Cancelled</a>
+        </nav>
+        <div class="tab-content" id="orders-table-tab-content">
+            <div class="tab-pane fade show active" id="orders-all" role="tabpanel" aria-labelledby="orders-all-tab">
+                <div class="app-card app-card-orders-table shadow-sm mb-5">
+                    <div class="app-card-body">
+                        <div class="table-responsive">
+                            <table class="table app-table-hover mb-0 text-left" id="orders">
+                                <thead>
+                                    <tr>
+                                        <th class="cell">#</th>
+                                        <th class="cell">Product</th>
+                                        <th class="cell">Quantity</th>
+                                        <th class="cell">Total</th>
+                                        <th class="cell">Order Date</th>
+                                        <th class="cell">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (typeof (allresult) != "undefined") { %> 
+                                        <% var i = 1 %> 
+                                        <% allresult.forEach(ar => { %>
+                                            <tr>
+                                                <td class="cell"><%= i %></td>
+                                                <td class="cell">
+                                                    <span class="truncate"><%= ar.prod_name %></span>
+                                                </td>
+                                                <td class="cell"><%= ar.qty %></td>
+                                                <td class="cell"><%= ar.payment %></td>
+                                                <td class="cell"><%= moment(ar.order_date).format('MMMM DD, YYYY') %></td>
+                                                <% if (ar.ord_stat == 1){ %>
+                                                    <td class="cell"><span class="badge bg-success">Approved</span></td>
+                                                <% } else if(ar.ord_stat == 0) { %>
+                                                    <td class="cell"><span class="badge bg-warning">Pending</span></td>
+                                                <% } else if(ar.ord_stat == 2) { %>
+                                                    <td class="cell"><span class="badge bg-danger">Cancelled</span></td>
+                                                <% } %>
+                                            </tr>
+                                            <% i++ %> 
+                                        <% }) %> 
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div><!--//table-responsive-->
+                    
+                    </div><!--//app-card-body-->		
+                </div><!--//app-card-->
+                
+            </div><!--//tab-pane-->
+            
+            <div class="tab-pane fade" id="orders-paid" role="tabpanel" aria-labelledby="orders-paid-tab">
+                <div class="app-card app-card-orders-table mb-5">
+                    <div class="app-card-body">
+                        <div class="table-responsive">
+                            <table class="table mb-0 text-left" id="orders">
+                                <thead>
+                                    <tr>
+                                        <th class="cell">#</th>
+                                        <th class="cell">Product</th>
+                                        <th class="cell">Quantity</th>
+                                        <th class="cell">Total</th>
+                                        <th class="cell">Order Date</th>
+                                        <th class="cell">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (typeof (accResult) != "undefined") { %> 
+                                        <% var j = 1 %> 
+                                        <% accResult.forEach(ac => { %>
+                                            <tr>
+                                                <td class="cell"><%= j %></td>
+                                                <td class="cell">
+                                                    <span class="truncate"><%= ac.prod_name %></span>
+                                                </td>
+                                                <td class="cell"><%= ac.qty %></td>
+                                                <td class="cell"><%= ac.payment %></td>
+                                                <td class="cell"><%= moment(ac.order_date).format('MMMM DD, YYYY') %></td>
+                                                <td class="cell"><span class="badge bg-success">Approved</span></td>
+                                            </tr>
+                                            <% j++ %> 
+                                        <% }) %> 
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div><!--//table-responsive-->
+                    </div><!--//app-card-body-->		
+                </div><!--//app-card-->
+            </div><!--//tab-pane-->
+            
+            <div class="tab-pane fade" id="orders-pending" role="tabpanel" aria-labelledby="orders-pending-tab">
+                <div class="app-card app-card-orders-table mb-5">
+                    <div class="app-card-body">
+                        <div class="table-responsive">
+                            <table class="table mb-0 text-left" id="orders">
+                                <thead>
+                                    <tr>
+                                        <th class="cell">#</th>
+                                        <th class="cell">Product</th>
+                                        <th class="cell">Quantity</th>
+                                        <th class="cell">Total</th>
+                                        <th class="cell">Order Date</th>
+                                        <th class="cell">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (typeof (penResult) != "undefined") { %> 
+                                        <% var k = 1 %> 
+                                        <% penResult.forEach(pr => { %>
+                                            <tr>
+                                                <td class="cell"><%= k %></td>
+                                                <td class="cell">
+                                                    <span class="truncate"><%= pr.prod_name %></span>
+                                                </td>
+                                                <td class="cell"><%= pr.qty %></td>
+                                                <td class="cell"><%= pr.payment %></td>
+                                                <td class="cell"><%= moment(pr.order_date).format('MMMM DD, YYYY') %></td>
+                                                <td class="cell"><span class="badge bg-warning">Pending</span></td>
+                                            </tr>
+                                            <% k++ %> 
+                                        <% }) %> 
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div><!--//table-responsive-->
+                    </div><!--//app-card-body-->		
+                </div><!--//app-card-->
+            </div><!--//tab-pane-->
+            <div class="tab-pane fade" id="orders-cancelled" role="tabpanel" aria-labelledby="orders-cancelled-tab">
+                <div class="app-card app-card-orders-table mb-5">
+                    <div class="app-card-body">
+                        <div class="table-responsive">
+                            <table class="table mb-0 text-left" id="orders">
+                                <thead>
+                                    <tr>
+                                        <th class="cell">#</th>
+                                        <th class="cell">Product</th>
+                                        <th class="cell">Quantity</th>
+                                        <th class="cell">Total</th>
+                                        <th class="cell">Order Date</th>
+                                        <th class="cell">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (typeof (canResult) != "undefined") { %> 
+                                        <% var l = 1 %> 
+                                        <% canResult.forEach(cr => { %>
+                                            <tr>
+                                                <td class="cell"><%= l %></td>
+                                                <td class="cell">
+                                                    <span class="truncate"><%= cr.prod_name %></span>
+                                                </td>
+                                                <td class="cell"><%= cr.qty %></td>
+                                                <td class="cell"><%= cr.payment %></td>
+                                                <td class="cell"><%= moment(cr.order_date).format('MMMM DD, YYYY') %></td>
+                                                <td class="cell"><span class="badge bg-danger">Cancelled</span></td>
+                                            </tr>
+                                            <% l++ %> 
+                                        <% }) %> 
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div><!--//table-responsive-->
+                    </div><!--//app-card-body-->		
+                </div><!--//app-card-->
+            </div><!--//tab-pane-->
+        </div>
+    </div>
+    <%- include ("./partials/_footer") %>
+    <script src="/public/products/script.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("*#orders").DataTable();
+      });
+    </script>
+  </body>
+</html>
+
+			    

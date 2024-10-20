@@ -1,0 +1,76 @@
+<div class="site-mobile-menu site-navbar-target">
+  <div class="site-mobile-menu-header">
+    <div class="site-mobile-menu-close mt-3">
+      <span class="icon-close2 js-menu-toggle"></span>
+    </div>
+  </div>
+  <div class="site-mobile-menu-body"></div>
+</div>
+
+<header
+  class="site-navbar js-sticky-header site-navbar-target"
+  role="banner"
+  style="border-bottom: 2px solid rgb(199, 198, 192);"
+>
+  <div class="container">
+    <div class="row align-items-center position-relative">
+      <div class="col-12">
+        <nav class="site-navigation text-right ml-auto" role="navigation">
+          <ul
+            class="site-menu main-menu js-clone-nav ml-auto d-none d-lg-block"
+          >
+            <li><a href="/shop" class="nav-link">Home</a></li>
+            <% if ( typeof (locals.loggedID) != "undefined" && locals.loggedID) { %>
+            <li><a href="/products" class="nav-link">Products</a></li>
+            <li>
+              <a href="/orders" class="nav-link">Orders
+              </a>
+          </li>
+            <li>
+              <a href="/cart" class="nav-link">
+                <i class="fa">&#xf07a;</i> Cart
+                <span class='badge badge-dark' id='lblCartCount'>
+                  <% if (typeof (cresult) != "undefined") { %> 
+                    <% cresult.forEach(cr => { %>
+                      <% if(cr.total_qty > 0){ %>
+                        <%= cr.total_qty %>
+                      <% } else{ %>
+                        0
+                      <% } %>
+                    <% }) %>
+                  <% } %>
+                </span>
+              </a>
+            </li>
+            <% } %>
+            <li class="has-children">
+              <a href="#" class="nav-link">Account</a>
+              <ul class="dropdown arrow-top">
+                <% if ( typeof (locals.loggedID) != "undefined" && locals.loggedID) { %>
+                <li class="nav-item">
+                  <a class="nav-link" href="/profile">Profile</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/logout">Logout</a>
+                </li>               
+                <% } else { %>
+                <li class="nav-item">
+                  <a class="nav-link" href="/login">Customer</a>
+                </li>
+                <li><a href="/register" class="nav-link">Register</a></li>
+                <li><a href="/admin" class="nav-link">Admin</a></li>
+                <% } %>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="toggle-button d-inline-block d-lg-none">
+        <a href="#" class="site-menu-toggle py-3 js-menu-toggle text-black">
+          <span class="icon-menu h3"></span>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>

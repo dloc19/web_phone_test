@@ -1,0 +1,52 @@
+<% if ( typeof (checkoutSuccess) != "undefined" && checkoutSuccess) { %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Thank you!</title>
+    <link rel="icon" href="../../public/imgs/nodejs-logo.png" />
+    <%- include ("./partials/_head") %>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <script>
+      function startTimer(duration, display) {
+        var timer = duration;
+        var end =setInterval(function () {
+            seconds = parseInt(timer);
+            display.textContent = seconds;
+            if (--timer < 0) {
+                window.location = "/orders";
+                clearInterval(end);
+            }
+        }, 1000);
+      }
+      window.onload = function () {
+        var fiveseconds = 5,
+        display = document.querySelector('#time');
+        startTimer(fiveseconds, display);
+      };
+    </script>
+  </head>
+  <body class="jumbotron">
+    <div class="jumbotron text-center my-5">
+        <h3 class="">Your order has been placed. <br/>Thank you, shop again! </h3>
+        <p class="lead text-dark">"Happiness is not in money, but in shopping." Have a great day!</p>
+        <p class="lead text-dark">Redirecting in <span id="time">5</span> seconds.... Please wait.</p>
+        <hr>
+      </div>
+    <!--//container-->
+  </body>
+</html>
+<% } else { %>
+  <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script>
+      window.location.href = '/shop';
+    </script>
+  </head>
+  <body>  
+  </body>
+</html>
+<% } %>

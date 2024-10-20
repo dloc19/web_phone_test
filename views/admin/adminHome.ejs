@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>ComputerAvenue | Dashboard</title>
+    <link rel="icon" href="../../public/imgs/nodejs-logo.png" />
+    <%- include ("./includes/_head") %>
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+  </head>
+  <body class="app">
+    <%- include ("./includes/_nav") %>
+    <div class="app-wrapper">
+      <div class="app-content container pt-3 p-md-3 p-lg-4">
+        <div class="container-xl">
+          <h1 class="app-page-title">Dashboard</h1>
+
+          <div class="row g-4 mb-4">
+            <div class="col-12 col-lg-3">
+              <div class="app-card app-card-basic d-flex flex-column align-items-start shadow-sm">
+                <div class="app-card-header p-3 border-bottom-0">
+                  <div class="row align-items-center gx-3">
+                    <div class="col-auto">
+                      <div class="app-icon-holder">
+                        <i class="fa fa-laptop"></i>
+                      </div>
+                      <!--//icon-holder-->
+                    </div>
+                    <!--//col-->
+                    <div class="col-auto">
+                      <h4 class="app-card-title">Categories</h4>
+                    </div>
+                    <!--//col-->
+                  </div>
+                  <!--//row-->
+                </div>
+                <div class="app-card-body px-4">
+                  <div class="intro">
+                    <h4 class="fw-light">
+                    Total Categories
+                    </h4>
+                    <h2>
+                     <% if (typeof (cresult) != "undefined") { %>
+                      <% cresult.forEach(cr => { %>
+                        <% if(cr.total_cid > 0){ %> 
+                          <%= cr.total_cid %>
+                        <% } else{ %>
+                          0
+                        <% } %>
+                      <% }) %>
+                    <% } %> 
+                    </h2>
+                  </div>
+                </div>
+                <!--//app-card-body-->
+                <div class="app-card-footer p-4 mt-auto">
+                  <a class="btn app-btn-secondary" href="/admin/addCategory"><i class="fas fa-plus-circle"></i> Create</a>
+                </div>
+                <!--//app-card-footer-->
+              </div>
+              <!--//app-card-->
+            </div>
+            <!--//col-->
+            <div class="col-12 col-lg-3">
+              <div class="app-card app-card-basic d-flex flex-column align-items-start shadow-sm">
+                <div class="app-card-header p-3 border-bottom-0">
+                  <div class="row align-items-center gx-3">
+                    <div class="col-auto">
+                      <div class="app-icon-holder">
+                        <i class="fa fa-folder"></i>
+                      </div>
+                    </div>
+                    <div class="col-auto">
+                      <h4 class="app-card-title">Products</h4>
+                    </div>
+                  </div>
+                </div>
+                <!--//app-card-header-->
+                <div class="app-card-body px-4">
+                  <div class="intro">
+                    <h4 class="fw-light">
+                    Total Products
+                    </h4>
+                    <h2>
+                      <% if (typeof (presult) != "undefined") { %>
+                      <% presult.forEach(pr => { %>
+                        <% if(pr.total_pid > 0){ %> 
+                          <%= pr.total_pid %>
+                        <% } else{ %>
+                          0
+                        <% } %>
+                      <% }) %>
+                    <% } %>
+                    </h2>
+                  </div>
+                </div><br>
+                <!--//app-card-body-->
+                <div class="app-card-footer ps-4 pb-4 mt-auto">
+                  <a class="btn app-btn-secondary" href="/admin/addProduct">
+                  <i class="fas fa-plus-circle"></i> Add</a>
+                </div>
+                <!--//app-card-footer-->
+              </div>
+              <!--//app-card-->
+            </div>
+            <!--//col-->
+            <div class="col-12 col-lg-3">
+              <div class="app-card app-card-basic d-flex flex-column align-items-start shadow-sm">
+                <div class="app-card-header p-3 border-bottom-0">
+                  <div class="row align-items-center gx-3">
+                    <div class="col-auto">
+                      <div class="app-icon-holder">
+                        <i class="fa fa-cart-shopping"></i>
+                      </div>
+                    </div>
+                    <div class="col-auto">
+                      <h4 class="app-card-title">Orders</h4>
+                    </div>
+                  </div>
+                </div>
+                <div class="app-card-body px-4">
+                  <div class="intro">
+                    <h4 class="fw-light">
+                      Total Orders
+                    </h4>
+                    <h2>
+                      <% if (typeof (oresult) != "undefined") { %>
+                        <% oresult.forEach(or => { %>
+                          <% if(or.total_oid > 0){ %> 
+                            <%= or.total_oid %>
+                          <% } else{ %>
+                            0
+                          <% } %>
+                        <% }) %>
+                      <% } %>
+                    </h2>
+                  </div>
+                </div>
+                <!--//app-card-body-->
+                <div class="app-card-footer p-4 mt-auto">
+                  <a class="btn app-btn-secondary" href="/admin/manageOrders"><i class="fas fa-cog"></i> Manage Orders</a>
+                </div>
+                <!--//app-card-footer-->
+              </div>
+              <!--//app-card-->
+            </div>
+            
+            <div class="col-12 col-lg-3">
+              <div
+                class="app-card app-card-basic d-flex flex-column align-items-start shadow-sm"
+              >
+                <div class="app-card-header p-3 border-bottom-0">
+                  <div class="row align-items-center gx-3">
+                    <div class="col-auto">
+                      <div class="app-icon-holder">
+                        <i class="fa fa-users"></i>
+                      </div>
+                    </div>
+                    <div class="col-auto">
+                      <h4 class="app-card-title">Users</h4>
+                    </div>
+                  </div>
+                </div>
+                <div class="app-card-body px-4">
+                  <div class="intro">
+                    <h4 class="fw-light">
+                      Total Users
+                    </h4>
+                    <h2>
+                       <% if (typeof (uresult) != "undefined") { %>
+                        <% uresult.forEach(ur => { %>
+                          <% if(ur.total_uid > 0){ %> 
+                            <%= ur.total_uid %>
+                          <% } else{ %>
+                            0
+                          <% } %>
+                        <% }) %>
+                      <% } %>
+                    </h2>
+                  </div>
+                </div>
+                <!--//app-card-body-->
+                <div class="app-card-footer p-4 mt-auto">
+                  <a class="btn app-btn-secondary" href="/admin/manageUsers"><i class="fas fa-cog"></i> Manage</a>
+                </div>
+                <!--//app-card-footer-->
+              </div>
+              <!--//app-card-->
+            </div>
+            <!--//col-->
+           
+            <!--//col-->
+          </div>
+          <!--//row-->
+        </div>
+        <!--//container-fluid-->
+      
+        <!--//app-footer-->
+      </div>
+      <!--//app-content-->
+      <div class="col-lg pb-5"><br><div class="pb-5"></div><br></div>
+      <%- include ("./includes/_footer") %>
+  </body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>ComputerAvenue | Add Category</title>
+    <link rel="icon" href="../../public/imgs/nodejs-logo.png" />
+    <%- include ("./includes/_head") %>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+  </head>
+  <body class="app">
+    <%- include ("./includes/_nav") %>
+    <div class="app-wrapper">
+      <div class="app-content container pt-3 p-md-3 p-lg-4">
+        <div class="col-12 col-lg-6">
+          <div class="app-card app-card-basic d-flex flex-column align-items-start shadow-sm">
+            <div class="app-card-header p-3 border-bottom-0">
+              <div class="row align-items-center gx-3">
+                <div class="col-auto">
+                  <div class="app-icon-holder">
+                    <i class="fa fa-laptop"></i>
+                  </div>
+                  <!--//icon-holder-->
+                </div>
+                <!--//col-->
+                <div class="col-auto">
+                  <h2 class="app-card-title" style="font-size: 2rem;">Add Category</h2>
+                </div>
+                <!--//col-->
+              </div>
+              <!--//row-->
+            </div>
+            <!--//app-card-header-->
+            <form method="POST" class="w-100 mt-2">
+            <div class="app-card-body px-4" >
+              <div class="form-floating mb-3 w-50">
+                <input type="text" class="form-control mb-2" id="cat_name" name="cat_name" placeholder="Type here..." required/>
+                <label for="cat_name">Category Name</label>
+                <% if ( typeof (alert) != "undefined" && alert) { %>
+                <p class="text-success"><%= alert %></p>  
+                <% } %>
+                <% if ( typeof (error) != "undefined" && error) { %>
+                  <p class="text-danger"><%= error %></p>  
+                <% } %>
+              </div>
+              <input type="submit" name="submit" class="btn btn-info text-white mb-5" value="Add Category">
+            </form>
+            <!--//app-card-body-->
+          </div>
+          <!--//app-card-->
+        </div>
+        <!--//container-fluid-->
+      </div>
+      <!--//app-content-->
+    </div>
+    <div class="col-lg pb-5 mb-5"><br><div class="pb-5 mb-5"></div><br></div>
+    <%- include ("./includes/_footer") %>
+  </body>
+</html>

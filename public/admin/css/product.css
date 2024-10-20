@@ -1,0 +1,81 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap");
+
+input[type=number].no-spinner::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.product-item {
+  border: 1px solid rgb(219, 219, 219);
+}
+.product-img {
+  position: relative;
+  overflow: hidden;
+}
+.btns {
+  position: absolute;
+  left: 0;
+  bottom: 0%;
+  font-size: 15px;
+  font-weight: 300;
+  transition: all 0.3s ease-in-out;
+}
+.btns button {
+  border: none;
+  background-color: rgba(39, 39, 39, 0.521);
+  color: rgb(255, 255, 255);
+  transition: all 0.3s ease-in-out;
+}
+.btns button:hover {
+  font-weight: bold;
+  color: black;
+  background-color: rgb(247, 184, 184);
+}
+.card-body .btn{
+  margin: 10px;
+  font-weight: 500;
+  border-radius: 5px;
+  box-shadow: 0px 10px 5px #d4d4d4;
+}
+.card{
+  box-shadow: 0px 10px 10px #d4d4d4;
+  border-radius: 10px;
+  border: none;
+  border-top: 1px solid #87b3ff;
+  transition: 0.2s ease-in-out;
+}
+.card:hover{
+  box-shadow: 0px 10px 20px #c5c5c5;
+}
+#edit{
+  background: #abcaff;
+}
+#edit:hover{
+  background: #87b3ff;
+}
+#feat:hover{
+  background: #ebf9ff;
+}
+.heart-icon {
+  position: absolute;
+  top: 16px;
+  right: 15px;
+  font-size: 18px;
+}
+
+.product-type {
+  font-size: 13px;
+  opacity: 0.8;
+}
+.product-name {
+  transition: all 0.3s ease-in-out;
+}
+.product-price {
+  color: #000000;
+}
+.rating {
+  font-size: 13px;
+}
+.product-item {
+  width: 300px;
+}

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>ComputerAvenue | Featured Product</title>
+    <link rel="icon" href="../../public/imgs/nodejs-logo.png" />
+    <%- include ("./includes/_head") %>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    <link id="theme-style" rel="stylesheet" href="../../public/admin/css/product.css"/>
+  </head>
+  <body class="app">
+    <%- include ("./includes/_nav") %>
+    <div class="app-wrapper">
+      <div class="app-content container pt-3 p-md-3 p-lg-4">
+        <div class="col-lg-12">
+          <div class="app-card app-card-basic d-flex flex-column align-items-start shadow-sm">
+            <div class="container-fluid">
+              <div class="app-card-header p-3 border-bottom-0">
+                <div class="row">
+                  <div class="col-1">
+                    <div class="app-icon-holder">
+                    <i class="fa fa-star"></i>
+                    </div>
+                  </div>
+                  <div class="col-6 mt-1">
+                    <h2 class="app-card-title" style="font-size: 2rem;">Featured Products </h2>
+                  </div>
+                  <div class="col-5 mt-3 d-flex justify-content-end">
+                    <span class="px-3"><i class="fa fa-circle" style="color: #dc3545"></i> Out of Stock</span>
+                    <span><i class="fa fa-circle" style="color: #198754"></i> Available</span>
+                  </div>
+                </div>  
+              </div>
+              </div>
+            <div class="container">
+              <div class="row">
+                <% if ( typeof (alert) != "undefined" && alert) { %>
+                  <div class="alert alert-danger alert-dismissible w-100 fade show" role="alert" >
+                    <%= alert %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" ></button>
+                  </div>
+                <% } %>
+
+                <% if ( typeof (noresult) != "undefined" && noresult) { %>
+                  <div class="text-center w-100" >
+                    <%= noresult %>
+                 </div>
+                <% } %>
+
+                <% if ( typeof (searchalert) != "undefined" && searchalert) { %>
+                    <div class="alert alert-danger text-center w-100 fade show" role="alert">
+                      No result found for <strong><%= searchalert %></strong>.
+                      <span>Go <a href="/admin/manageProduct" style="text-decoration: underline;"><strong>back</strong>.</a></span>
+                    </div>
+                  <% } %>
+
+                  <% if (typeof (result) != "undefined") { %> <% result.forEach(r => { %>
+                    <div class="col-lg-4 col-12">
+                      <div class="card mb-5" style="width: 18rem; height: 30rem;">
+                        <% if (r.prod_qty == 0){ %>
+                          <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                            <span class="visually-hidden">New alerts</span>
+                          </span>
+                          <% } else{ %>
+                            <span class="position-absolute top-0 start-100 translate-middle p-2 bg-success border border-light rounded-circle">
+                            <span class="visually-hidden">New alerts</span>
+                            </span>
+                          <% } %>
+
+                          <div class="product-img">
+                            <img src="../../public/uploads/<%= r.prod_img %>" alt="<%= r.prod_img %>" class="img-fluid d-block mx-auto my-2" style="height: 200px;"/>
+                          </div>
+
+                          <div class="card-body">
+                            <h5 class="card-title"><%= r.prod_name %><br/></h5>
+                            <p class="card-text">
+                              <div class="row">
+                                <div class="col-4">Price:</div>
+                                <div class="col-8 d-flex justify-content-end">
+                                  <strong>Php. <%= r.prod_price %></strong>  
+                                </div>
+                              </div>
+                            </p>
+                            <p class="card-text">
+                              <div class="row">
+                                <div class="col-4">Stock: </div>
+                                <div class="col-8 d-flex justify-content-end">
+                                  <strong><%= r.prod_qty %></strong>  
+                                </div>
+                              </div>
+                            </p>
+                            <p class="card-text">
+                              <div class="row">
+                                <div class="col-5">Category: </div>
+                                <div class="col-7 d-flex justify-content-end">
+                                  <strong><%= r.cat_name %></strong>  
+                                </div>
+                              </div>
+                            </p>
+                            <br>
+                            <div class="row pb-3">
+                              <div class="col-12 d-flex justify-content-center">
+                                <a class="btn btn-danger text-white" data-bs-toggle="modal" data-bs-target="#removeProduct<%= r.prod_id %>">
+                                  <i class="fa fa-trash"></i> Remove
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="modal fade" id="removeProduct<%= r.prod_id %>" tabindex="-1" aria-labelledby="removeProductLabel" aria-hidden="true" >
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="removeProductLabel">
+                                    <%= r.prod_name %>
+                                  </h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" ></button>
+                                </div>
+                                  <div class="modal-body">
+                                  <form method="POST" class="w-100">
+                                    <input type="hidden" name="prod_id" value="<%= r.prod_id %>">
+                                    <center>
+                                      <img id='profileDisplay' src='../../public/uploads/<%= r.prod_img %>' style="width: 200px; height: 200px;" alt="Sample Image" />
+                                    </center><br>
+                                      Are you sure you want to remove this from featured products?
+                                  </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                          Close
+                                        </button>
+                                    <input type="submit" name="remove" class="btn btn-danger text-white" value="Remove">
+                                  </form>    
+                                  </div>
+                            </div>
+                            </div>
+                          </div>                
+                      </div>
+                    </div>
+                  <% }) %> <% } %>
+              </div>
+            </div>
+
+           
+          </div>
+        </div>
+      </div>
+      <%- include ("./includes/_footer") %>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>ComputerAvenue | Add Product</title>
+    <link rel="icon" href="../../public/imgs/nodejs-logo.png" />
+    <%- include ("./includes/_head") %>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    <style>
+        input[type=number].no-spinner::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+    </style>
+  </head>
+  <body class="app">
+    <%- include ("./includes/_nav") %>
+    <div class="app-wrapper">
+      <div class="app-content container pt-3 p-md-3 p-lg-4">
+        <div class="col-12">
+          <div class="app-card app-card-basic d-flex flex-column align-items-start shadow-sm">
+            <div class="app-card-header p-3 border-bottom-0">
+              <div class="row align-items-center gx-3">
+                <div class="col-auto">
+                  <div class="app-icon-holder">
+                    <i class="fa fa-folder"></i>
+                  </div>
+                  <!--//icon-holder-->
+                </div>
+                <!--//col-->
+                <div class="col-auto">
+                  <h2 class="app-card-title" style="font-size: 2rem;">Add Product</h2>
+                </div>
+                <!--//col-->
+              </div>
+              <!--//row-->
+            </div>
+            <!--//app-card-header-->
+            <form method="POST" class="w-100 mt-2" enctype="multipart/form-data">
+            <div class="app-card-body px-4">
+              <% if ( typeof (alert) != "undefined" && alert) { %>
+                <div class="alert alert-success alert-dismissible w-50 fade show" role="alert">
+                  <%= alert %>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                  </button>
+                </div>
+              <% } %>
+              <% if ( typeof (error) != "undefined" && error) { %>
+                <div class="alert alert-danger alert-dismissible w-50 fade show" role="alert">
+                  <%= error %>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"
+                    aria-label="Close"
+                  >
+                  </button>
+                </div>
+              <% } %>
+              <div class="row">
+                <div class="col-6">
+                  <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="prod_name" name="prod_name" placeholder="Type here..."/>
+                    <label for="prod_name">Product Name</label>
+                  </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-floating mb-3">
+                    <input type="number" class="form-control no-spinner" id="prod_qty" name="prod_qty" placeholder="Type here..."/>
+                    <label for="prod_qty">Product Quantity</label>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="form-floating mb-3">
+                    <input type="number" class="form-control no-spinner" id="prod_price" name="prod_price" placeholder="Type here..." />
+                    <label for="prod_price">Product Price</label>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="form-floating mb-3">
+                    <select class="form-select" id="prod_cat" name="prod_cat">
+                      <% if (typeof (result) != "undefined") { %>
+                              <option selected disabled>Choose...</option>
+                          <% result.forEach(r => { %>
+                              <option value="<%= r.cat_id %>"><%= r.cat_name %></option>
+                          <% }) %> 
+                      <% } %>
+                    </select>
+                    <label for="prod_cat">Product Category</label>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+              <label for="prod_img">Product Image</label>
+              <div class="col-6">
+                <input type="file" class="form-control" id="prod_img" name="prod_img" accept="image/png, image/jpg, image/jpeg" onchange="displayImage(this)"/>
+              </div><br><br><br>
+              <div class="col-12 pb-2">
+                <img id='profileDisplay' onclick='triggerClick()' 
+                  src='https://img.freepik.com/free-psd/3d-rendering-ui-icon_23-2149182289.jpg?w=740&t=st=1674317784~exp=1674318384~hmac=134ae61e7f1851f8645fc61a4411ad6d2263a9878c6d4c03741ef3a92ba78bcf' 
+                  style="width: 200px; height: 200px; cursor: pointer;" alt="Sample Image"/>
+              </div>
+              </div>
+              <br/>
+              <input type="submit" name="submit" class="btn btn-info btn-lg text-white mb-4" value="Add Product">
+            </form>
+            <!--//app-card-body-->
+          </div>
+          <!--//app-card-->
+        </div>
+        <!--//container-fluid-->
+      </div>
+      <!--//app-footer-->
+      <!--//app-content-->
+    </div>
+    <script>
+        function triggerClick() {
+            document.querySelector('#prod_img').click();
+        }
+        function displayImage(e) {
+            if (e.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.querySelector('#profileDisplay').setAttribute('src', e.target.result);
+                }
+                reader.readAsDataURL(e.files[0]);
+            }
+        }
+    </script>
+    <%- include ("./includes/_footer") %>
+  </body>
+</html>

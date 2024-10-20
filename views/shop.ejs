@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include ("./partials/_head") %>
+    <title>Ecommerce</title>
+    <link rel="icon" href="../public/imgs/nodejs-logo.png" />
+    <link href="/public/css/main.css" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <!-- fontawesome cdn -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- owl carousel -->
+    <link rel="stylesheet" href="public/owl_carousel/owl.carousel.css" />
+    <link rel="stylesheet" href="public/owl_carousel/owl.theme.default.css" />
+    <!-- custom css -->
+    <link rel="stylesheet" href="public/products/style.css" />
+  </head>
+
+  <body>
+    <%- include ("./partials/_nav") %>
+    <!-- Container -->
+    <br />
+    
+    <div class="container">
+      <div class="row my-3">
+        <h1 class="text-center">Featured Products</h1>
+      </div>
+        <% if ( typeof (alert) != "undefined" && alert) { %>
+          <div
+            class="alert alert-success alert-dismissible fade show"
+            role="alert"
+          >
+            <%= alert %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+        <% } %>
+        <% if ( typeof (cartAlert) != "undefined" && cartAlert) { %>
+          <div
+            class="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
+            <%= cartAlert %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+        <% } %>
+        <% if (typeof (result) != "undefined") { %>
+          <div class="row g-4 my-5 mx-auto owl-carousel owl-theme mb-5">
+            <% result.forEach(r => { %>
+              <div class="col product-item mx-auto">
+                <% if (r.prod_qty == 0){ %>
+                  <span class="badge badge-light bg-danger mt-2">Out of stock</span>
+                <% } else{ %>
+                    <span class="badge badge-light bg-success mt-2">Available</span>
+                <% } %>
+                <span class="badge badge-light bg-primary mt-2">Featured</span>
+                <div class="product-img">
+                  <img
+                    src="public/uploads/<%= r.prod_img %>"
+                    alt=""
+                    class="img-fluid d-block mx-auto my-2"
+                    style="height: 250px;"
+                  />
+                  <% if (r.prod_qty > 0){ %>
+                    <% if ( typeof (locals.loggedID) != "undefined" && locals.loggedID) { %>
+                      <div class="row btns w-100 mx-auto text-center">
+                        <button type="button" class="col-12 py-2" data-bs-toggle="modal"
+                        data-bs-target="#addToCart<%= r.prod_id %>">
+                          <i class="fa fa-cart-plus"></i> Add to Cart
+                        </button>
+                      </div>
+                    <% } %>
+                  <% } %>
+                </div>
+                <div class="product-info p-3">
+                  <span class="product-type"><%= r.cat_name %></span>
+                  <a class="d-block text-dark text-decoration-none py-2 product-name">
+                    <%= r.prod_name %>
+                  </a>
+                  <span class="product-price">Php <%= r.prod_price %></span>
+                  <div class="rating d-flex mt-1">
+                    Available: <%= r.prod_qty %>
+                  </div>
+                </div>
+              </div>
+              <% }) %>
+          </div>
+          <% result.forEach(r => { %>
+            <div
+              class="modal fade"
+              id="addToCart<%= r.prod_id %>"
+              tabindex="-1"
+              aria-labelledby="addToCartLabel"
+              aria-hidden="true"
+            >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="addToCartLabel">
+                    <%= r.prod_name %>
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  <form method="POST" class="w-100" >
+                  <input type="hidden" name="prod_id" value="<%= r.prod_id %>">
+                  <center><img src="public/uploads/<%= r.prod_img %>" style="width: 200px; height: 200px;" alt="<%= r.prod_name %>" />
+                  </center>
+                  <br/>
+                  <div class="form-floating mb-3 w-100">
+                    <input
+                      type="number"
+                      class="form-control no-spinner"
+                      id="prod_qty"
+                      name="prod_qty"
+                      required
+                      max="<%= r.prod_qty %>"
+                      min="1"
+                    />
+                    <label for="prod_qty">Quantity</label>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-bs-dismiss="modal"
+                    >
+                    Close
+                    </button>
+                    <input type="submit" name="add" class="btn btn-primary text-white" value="Add">
+                    </form>
+                </div>
+              </div>
+              
+            </div>
+            </div>
+          <% }) %>
+        <% } %>
+      <% if (typeof (noresult) != "undefined") { %> 
+        <center><h3 class="mb-5"><%= noresult %></h3></center>
+      <% } %>
+    </div>
+
+    <%- include ("./partials/_footer") %>
+    <script src="/public/products/script.js"></script>
+  </body>
+</html>
