@@ -1,0 +1,20 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .login-container {
+    background-image: url('path/to/your/image.jpg'); /* Đường dẫn tới ảnh nền */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh; /* Chiều cao tối thiểu là chiều cao màn hình */
+  }
+  
+  .card {
+    background-color: rgba(255, 255, 255, 0.8); /* Tạo nền trắng với độ trong suốt */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hiệu ứng đổ bóng */
+  }
+  

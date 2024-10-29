@@ -1,6 +1,7 @@
 const express = require("express")
 const shopRouter = express.Router()
 const shopController = require("../controllers/shopController");
+const authenticateToken = require("../controllers/authController");
 const con = require("../database/connection");
 const multer = require("multer");
 const fs = require('fs');
@@ -26,6 +27,32 @@ const adminredirectindex = (req, res, next) => {
 shopRouter.get("/", async (req, res) => {
   res.redirect("/login");
 });
+
+//API
+//ADMIN
+shopRouter.post('/api/admin', shopController.AdminLogin); //admin login
+shopRouter.get('/api/orders', shopController.ordersProduct); // get all product orders
+shopRouter.get('/api/orders/cancelled', shopController.manageCancelledOrders); // get all cancelled products
+shopRouter.get('/api/orders/accepted', shopController.manageAcceptedOrders); // get all accepted products
+shopRouter.get('/api/orders/pending', shopController.managePendingOrders); // get all accepted products
+shopRouter.get('/api/users', shopController.getUsers); //get all users
+
+
+//USERS
+shopRouter.post('/api/user', shopController.userRegistor); // add a user
+shopRouter.get('/api/orders/user/:userId', shopController.getOrdersByUserId); // lấy thông tin sản phẩm đã order
+
+//PRODUCTS
+shopRouter.get('/api/product/:id', shopController.getProductById); //get a product
+shopRouter.get('/api/product', shopController.getAllProducts); // get all product
+shopRouter.put('/api/product/:id', shopController.updateProduct); //update a product
+shopRouter.delete('/api/product/:id', shopController.deleteProduct); //delete a product
+
+//jwt
+/*shopRouter.get('/protected', authenticateToken, (req, res) => {
+  res.json({ message: "Access granted", user: req.user });
+});*/
+
 //THANK YOU PAGE
 shopRouter.get("/thankyou", redirectindex, async (req, res) => {
   res.render("thankyou");
@@ -95,26 +122,40 @@ var upload = multer({ storage: storage, limits: { fileSize: maxSize } });
 shopRouter.post('/admin/addProduct', upload.single('prod_img'), (req, res) => {
   if (!req.file) {
     console.log("No uploaded files");
+    return res.status(400).render("admin/addProduct", { alert: "Please upload a product image.", product_active: "active" });
   }
-  else {
-    let image_path = req.file.filename;
-    let prod_name = req.body.prod_name;
-    let prod_qty = req.body.prod_qty;
-    let prod_price = req.body.prod_price;
-    let prod_cat = req.body.prod_cat;
-    let prod_stat = 0;
-    const sql = `INSERT INTO products VALUES (NULL,?,?,?,?,?,?)`;
-    con.query(sql, [image_path, prod_name, prod_qty, prod_price, prod_cat, prod_stat], function (err, result) {
+
+  let image_path = req.file.filename;
+  let prod_name = req.body.prod_name;
+  let prod_qty = req.body.prod_qty;
+  let prod_price = req.body.prod_price;
+  let prod_cat = req.body.prod_cat;
+  let prod_stat = 0;
+
+  // Kiểm tra các trường bắt buộc
+  if (!prod_name || !prod_qty || !prod_price || !prod_cat) {
+    return res.status(400).render("admin/addProduct", { alert: "Please fill out all fields.", product_active: "active" });
+  }
+
+  // Kiểm tra giá và số lượng phải là số hợp lệ
+  if (isNaN(prod_qty) || isNaN(prod_price)) {
+    return res.status(400).render("admin/addProduct", { alert: "Quantity and price must be valid numbers.", product_active: "active" });
+  }
+
+  const sql = `INSERT INTO products VALUES (NULL,?,?,?,?,?,?)`;
+  con.query(sql, [image_path, prod_name, prod_qty, prod_price, prod_cat, prod_stat], function (err, result) {
+    if (err) throw err;
+
+    // Lấy danh sách các danh mục và hiển thị lại trang addProduct
+    con.query("SELECT * FROM categories", function (err, result) {
       if (err) throw err;
-      con.query("SELECT * FROM categories", function (err, result) {
-        if (err) throw err;
-        if (result.length > 0) {
-          res.render("admin/addProduct", { result: result, alert: "Product successfully added.", product_active: "active" });
-        }
-      });
+      if (result.length > 0) {
+        res.render("admin/addProduct", { result: result, alert: "Product successfully added.", product_active: "active" });
+      }
     });
-  }
+  });
 });
+
 //MANAGE PRODUCTS
 shopRouter.get('/admin/manageProduct', adminredirectindex, async (req, res) => {
   con.query("SELECT * FROM products INNER JOIN categories ON products.prod_cat = categories.cat_id", function (err, result) {
@@ -288,6 +329,7 @@ shopRouter.get('/admin/manageUsers', adminredirectindex, async (req, res) => {
     }
   });
 });
+//DEACTIVE
 shopRouter.post('/admin/manageUsers', shopController.deactivateUser);
 //ORDERS
 shopRouter.get('/admin/manageOrders', adminredirectindex, shopController.manageOrders);

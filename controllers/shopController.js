@@ -1,7 +1,343 @@
 const con = require("../database/connection");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const saltRounds = 10;
 var moment = require('moment');
+
+//API
+//ADMIN
+exports.AdminLogin = (req, res) => {
+  let username = req.body.uname;
+  let password = req.body.pwd;
+
+  con.query(
+    "SELECT * FROM admin WHERE admin_email=?",
+    [username],
+    function (err, result) {
+      if (err) throw err;
+
+      if (result.length > 0) {
+        // So sánh mật khẩu đã nhập với mật khẩu đã mã hóa trong database
+        bcrypt.compare(password, result[0].admin_pwd, function (err, isMatch) {
+          if (err) throw err;
+
+          if (isMatch) {
+            req.session.username = result[0].admin_name;
+            req.session.loggedID = result[0].admin_id;
+            
+            // Trả về thông tin admin dưới dạng JSON
+            res.status(200).json({
+              message: "Login successful",
+              admin: {
+                id: result[0].admin_id,
+                name: result[0].admin_name,
+                email: result[0].admin_email,
+                password: result[0].admin_pwd
+              }
+            });
+          } else {
+            res.status(401).json({ message: "Invalid password" });
+          }
+        });
+      } else {
+        res.status(401).json({ message: "Invalid email" });
+      }
+    }
+  );
+};
+
+exports.ordersProduct = (req, res) => {
+  con.query("SELECT *, orders.prod_id as opid FROM orders INNER JOIN products ON orders.prod_id = products.prod_id INNER JOIN users ON orders.user_id = users.id ORDER BY orders.order_id DESC", function (err, allresult) {
+    if (err) throw err;
+    if (allresult.length > 0) {
+      con.query("SELECT *, orders.prod_id as opid FROM orders INNER JOIN products ON orders.prod_id = products.prod_id INNER JOIN users ON orders.user_id = users.id WHERE ord_stat=0 ORDER BY orders.order_id DESC", function (err, penResult) {
+        if (err) throw err;
+        con.query("SELECT *, orders.prod_id as opid FROM orders INNER JOIN products ON orders.prod_id = products.prod_id INNER JOIN users ON orders.user_id = users.id WHERE ord_stat=1 ORDER BY orders.order_id DESC", function (err, accResult) {
+          if (err) throw err;
+          con.query("SELECT *, orders.prod_id as opid FROM orders INNER JOIN products ON orders.prod_id = products.prod_id INNER JOIN users ON orders.user_id = users.id WHERE ord_stat=2 ORDER BY orders.order_id DESC", function (err, canResult) {
+            if (err) throw err;
+            res.json({
+              order_active: "active",
+              allresult: allresult,
+              penResult: penResult,
+              accResult: accResult,
+              canResult: canResult,
+              moment: moment // Nếu không cần `moment` cho dữ liệu JSON, bạn có thể bỏ qua phần này.
+            });
+          });
+        });
+      });
+    } else {
+      res.json({ order_active: "active", fixed: "fixed-bottom" });
+    }
+  });
+};
+
+exports.manageCancelledOrders = (req, res) => {
+  con.query("SELECT *, orders.prod_id as opid FROM orders INNER JOIN products ON orders.prod_id = products.prod_id INNER JOIN users ON orders.user_id = users.id WHERE ord_stat = 2 ORDER BY orders.order_id DESC", function (err, canResult) {
+    if (err) throw err;
+    res.json({
+      order_active: "active",
+      canResult: canResult
+    });
+  });
+};
+
+exports.manageAcceptedOrders = (req, res) => {
+  con.query("SELECT *, orders.prod_id as opid FROM orders INNER JOIN products ON orders.prod_id = products.prod_id INNER JOIN users ON orders.user_id = users.id WHERE ord_stat = 1 ORDER BY orders.order_id DESC", function (err, accResult) {
+    if (err) throw err;
+    res.json({
+      order_active: "active",
+      accResult: accResult
+    });
+  });
+};
+
+exports.managePendingOrders = (req, res) => {
+  con.query("SELECT *, orders.prod_id as opid FROM orders INNER JOIN products ON orders.prod_id = products.prod_id INNER JOIN users ON orders.user_id = users.id WHERE ord_stat = 0 ORDER BY orders.order_id DESC", function (err, penResult) {
+    if (err) throw err;
+    res.json({
+      order_active: "active",
+      penResult: penResult
+    });
+  });
+};
+
+exports.getUsers = (req, res) => {
+  con.query("SELECT * FROM users", function (err, result) {
+    if (err) {
+      res.status(500).json({ error: "Có lỗi xảy ra khi truy vấn dữ liệu." });
+      throw err;
+    }
+
+    // Phân loại người dùng thành active và deactive
+    const activateUsers = result.filter(user => user.account_stat === 0); // Trạng thái tài khoản là active (1)
+    const deactivateUsers = result.filter(user => user.account_stat === 1); // Trạng thái tài khoản là deactive (0)
+
+    res.json({
+      users_active: "active",
+      activate: activateUsers,
+      deactivate: deactivateUsers
+    });
+  });
+};
+
+//USER
+exports.userRegistor = (req, res) => {
+  const fullname = req.body.fullname;
+  const addr = req.body.addr;
+  const username = req.body.uname;
+  const pass = req.body.pwd;
+  const password_confirm = req.body.password_confirm;
+
+  if (fullname == null) {
+    res.json({ error: "Fullname is required." });
+  } else if (pass !== password_confirm) {
+    res.json({ error: "Password didn't match." });
+  } else {
+    con.query("SELECT * FROM users WHERE username=?", [username], function (err, result) {
+      if (err) throw err;
+      if (result.length > 0) {
+        res.json({ error: "Email Address already exists." });
+      } else {
+        bcrypt.hash(pass, saltRounds, function (err, hash) {
+          if (err) throw err;
+
+          // Store the user in the database
+          const sql = `INSERT INTO users VALUES (NULL,?,?,?,0,?)`;
+          con.query(sql, [username, hash, fullname, addr], function (err, result) {
+            if (err) throw err;
+
+            // Return user data as JSON after successful registration
+            res.json({
+              message: "User registered successfully.",
+              user: {
+                id: result.insertId,
+                username: username,
+                fullname: fullname,
+                address: addr
+              }
+            });
+          });
+        });
+      }
+    });
+  }
+};
+
+exports.getOrdersByUserId = (req, res) => {
+  const userId = req.params.userId;
+
+  // Kiểm tra xem user_id có tồn tại hay không
+  con.query("SELECT * FROM users WHERE id = ?", [userId], function (err, userResult) {
+    if (err) {
+      res.status(500).json({ error: "Có lỗi xảy ra khi truy vấn dữ liệu người dùng." });
+      throw err;
+    }
+
+    // Nếu không tìm thấy user
+    if (userResult.length === 0) {
+      return res.status(500).json({ error: "Người dùng không tồn tại." });
+    }
+
+    // Nếu user tồn tại, tiếp tục truy vấn các đơn hàng
+    con.query(
+      "SELECT orders.order_id, orders.prod_id as opid, orders.ord_stat, products.* FROM orders INNER JOIN products ON orders.prod_id = products.prod_id WHERE orders.user_id = ? ORDER BY orders.order_id DESC",
+      [userId],
+      function (err, userOrders) {
+        if (err) {
+          res.status(500).json({ error: "Có lỗi xảy ra khi truy vấn dữ liệu đơn hàng." });
+          throw err;
+        }
+
+        // Phân loại các đơn hàng dựa trên trạng thái
+        const approved = userOrders.filter(order => order.ord_stat === 1);
+        const pending = userOrders.filter(order => order.ord_stat === 0);
+        const cancelled = userOrders.filter(order => order.ord_stat === 2);
+
+        res.json({
+          user_id: userId,
+          approved: approved,
+          pending: pending,
+          cancelled: cancelled
+        });
+      }
+    );
+  });
+};
+
+//PRODUCT
+exports.getProductById = (req, res) => {
+  const productId = req.params.id;  // Lấy id sản phẩm từ URL
+
+  // Truy vấn lấy sản phẩm dựa trên productId
+  con.query(
+    "SELECT prod_id, prod_img, prod_name, prod_qty, prod_price, prod_cat, prod_stat FROM products WHERE prod_id = ?",
+    [productId],
+    function (err, result) {
+      if (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+
+      // Kiểm tra nếu tìm thấy sản phẩm
+      if (result.length > 0) {
+        res.json({
+          product: result[0]  // Trả về sản phẩm đầu tiên (chỉ có một sản phẩm với id)
+        });
+      } else {
+        res.status(404).json({
+          message: "Product not found."
+        });
+      }
+    }
+  );
+};
+
+exports.updateProduct = (req, res) => {
+  const productId = req.params.id;  // Lấy id sản phẩm từ URL
+  const { prod_img, prod_name, prod_qty, prod_price, prod_cat, prod_stat } = req.body;  // Lấy dữ liệu từ body
+
+  // Tạo mảng để lưu các trường cần cập nhật và giá trị tương ứng
+  const updates = [];
+  const values = [];
+
+  // Kiểm tra từng trường và chỉ thêm nếu có giá trị mới
+  if (prod_img !== undefined) {
+    updates.push("prod_img = ?");
+    values.push(prod_img);
+  }
+  if (prod_name !== undefined) {
+    updates.push("prod_name = ?");
+    values.push(prod_name);
+  }
+  if (prod_qty !== undefined) {
+    updates.push("prod_qty = ?");
+    values.push(prod_qty);
+  }
+  if (prod_price !== undefined) {
+    updates.push("prod_price = ?");
+    values.push(prod_price);
+  }
+  if (prod_cat !== undefined) {
+    updates.push("prod_cat = ?");
+    values.push(prod_cat);
+  }
+  if (prod_stat !== undefined) {
+    updates.push("prod_stat = ?");
+    values.push(prod_stat);
+  }
+
+  // Kiểm tra xem có trường nào cần cập nhật không
+  if (updates.length === 0) {
+    return res.status(400).json({ message: "No fields to update." });
+  }
+
+  // Tạo câu truy vấn SQL
+  const sql = `UPDATE products SET ${updates.join(", ")} WHERE prod_id = ?`;
+  values.push(productId);  // Thêm productId vào cuối mảng giá trị
+
+  // Thực hiện truy vấn
+  con.query(sql, values, function (err, result) {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+
+    if (result.affectedRows > 0) {
+      res.json({
+        message: "Product updated successfully."
+      });
+    } else {
+      res.status(404).json({ message: "Product not found." });
+    }
+  });
+};
+
+exports.deleteProduct = (req, res) => {
+  const productId = req.params.id;  // Lấy id sản phẩm từ URL
+
+  // Truy vấn để xóa sản phẩm
+  con.query("DELETE FROM products WHERE prod_id = ?", [productId], function (err, result) {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+
+    if (result.affectedRows > 0) {
+      res.json({
+        message: "Product deleted successfully."
+      });
+    } else {
+      res.status(404).json({ message: "Product not found." });
+    }
+  });
+};
+
+exports.getAllProducts = (req, res) => {
+  // Truy vấn để lấy tất cả sản phẩm
+  con.query("SELECT prod_id, prod_img, prod_name, prod_qty, prod_price, prod_cat, prod_stat FROM products", function (err, result) {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+
+    // Kiểm tra nếu không có sản phẩm nào
+    if (result.length === 0) {
+      return res.status(404).json({ message: "No products found." });
+    }
+
+    // Trả về danh sách sản phẩm
+    res.json({
+      products: result
+    });
+  });
+};
+
+
 //SHOP PAGE CUSTOMER
 exports.shopPage = (req, res) => {
   let loggedID = req.session.loggedID;
@@ -70,24 +406,48 @@ exports.profilePage = (req, res) => {
 }
 exports.updateProfilePage = (req, res) => {
   const loggedID = req.session.loggedID;
+
   if (req.body.user_id && req.body.cur_pwd) {
     let cur_pwd = req.body.cur_pwd;
     let new_pwd = req.body.new_pwd;
     let con_new_pwd = req.body.con_new_pwd;
     let user_id = req.body.user_id;
+
     con.query("SELECT * FROM users WHERE id=?", [user_id], function (err, result) {
       if (err) throw err;
+
       if (result.length > 0) {
         if (bcrypt.compareSync(cur_pwd, result[0].password)) {
-          if (new_pwd != con_new_pwd) {
+          // Kiểm tra mật khẩu mới không trùng với mật khẩu cũ
+          if (new_pwd === cur_pwd) {
             con.query("SELECT COUNT(cart_id) as total_qty FROM carts WHERE user_id=?", [loggedID], function (err, cresult) {
               if (err) throw err;
-              res.render("account", { alert: "New password and confirm new password doesn't match.", result: result, cresult: cresult });
+              res.status(401).render("account", {
+                alert: "New password must not be the same as the current password.",
+                result: result,
+                cresult: cresult
+              });
             });
-          }
-          else {
+          } else if (new_pwd.length < 6) {
+            con.query("SELECT COUNT(cart_id) as total_qty FROM carts WHERE user_id=?", [loggedID], function (err, cresult) {
+              if (err) throw err;
+              res.status(401).render("account", {
+                alert: "New password must be at least 6 characters long.",
+                result: result,
+                cresult: cresult
+              });
+            });
+          } else if (new_pwd !== con_new_pwd) {
+            con.query("SELECT COUNT(cart_id) as total_qty FROM carts WHERE user_id=?", [loggedID], function (err, cresult) {
+              if (err) throw err;
+              res.status(401).render("account", {
+                alert: "New password and confirm new password don't match.",
+                result: result,
+                cresult: cresult
+              });
+            });
+          } else {
             bcrypt.hash(new_pwd, saltRounds, function (err, hash) {
-              // Store hash in your password DB.
               const sql = `UPDATE users SET password=? WHERE id=?`;
               con.query(sql, [hash, user_id], function (err, uresult) {
                 if (err) throw err;
@@ -105,15 +465,13 @@ exports.updateProfilePage = (req, res) => {
             if (err) throw err;
             con.query("SELECT COUNT(cart_id) as total_qty FROM carts WHERE user_id=?", [loggedID], function (err, cresult) {
               if (err) throw err;
-              res.render("account", { alert: "Incorrect current password.", result: result, cresult: cresult });
+              res.status(401).render("account", { alert: "Incorrect current password.", result: result, cresult: cresult });
             });
           });
         }
       }
-    }
-    );
-  }
-  else if (req.body.user_id && req.body.new_addr) {
+    });
+  } else if (req.body.user_id && req.body.new_addr) {
     let new_addr = req.body.new_addr;
     let user_id = req.body.user_id;
     const sql = `UPDATE users SET addr=? WHERE id=?`;
@@ -127,7 +485,7 @@ exports.updateProfilePage = (req, res) => {
       });
     });
   }
-}
+};
 //PRODUCTS PAGE CUSTOMER
 exports.productsPage = (req, res) => {
   let loggedID = req.session.loggedID;
@@ -154,6 +512,7 @@ exports.productsPage = (req, res) => {
     }
   });
 };
+
 exports.productAllFunction = (req, res) => {
   if (req.body.prod_cat) {
 
@@ -437,10 +796,24 @@ exports.userinsert = (req, res) => {
   const pass = req.body.pwd;
   const password_confirm = req.body.password_confirm;
   const addr = req.body.addr;
-  if (fullname == null) {
+
+  const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+  if (!fullname || !username || !pass || !password_confirm || !addr) {
+    res.status(401).render("register", {
+      alertpass: "Please fill in this field",
+    });
+  } else if (!gmailRegex.test(username)){
+    res.status(401).render("register", {
+      alertpass: "Gmail is not in correct format",
+    });
   } else if (pass != password_confirm) {
-    res.render("register", {
+    res.status(401).render("register", {
       alertpass: "Password didn't matched",
+    });
+  } else if (pass.length < 6) {
+    res.status(401).render("register", {
+      alertpass: "Password must have at least 6 characters",
     });
   } else {
     con.query(
@@ -449,7 +822,7 @@ exports.userinsert = (req, res) => {
       function (err, result) {
         if (err) throw err;
         if (result.length > 0) {
-          res.render("register", {
+          res.status(401).render("register", {
             alertpass: "Email Address already exists",
           });
         } else {
@@ -485,15 +858,16 @@ exports.checkAdminLogin = (req, res) => {
           if (isMatch) {
             req.session.username = result[0].admin_name;
             req.session.loggedID = result[0].admin_id;
+            
             res.redirect("/admin/home");
           } else {
-            res.render("adminLogin", {
+            res.status(401).render("adminLogin", {
               alert: "Invalid password"
             });
           }
         });
       } else {
-        res.render("adminLogin", { alert: "Invalid email" });
+        res.status(401).render("adminLogin", { alert: "Invalid email" });
       }
     }
   );
@@ -503,31 +877,40 @@ exports.checkAdminLogin = (req, res) => {
 exports.checkLogin = (req, res) => {
   let username = req.body.uname;
   let password = req.body.pwd;
-  con.query(
-    "SELECT * FROM users WHERE users.username=? AND account_stat = 0",
-    [username],
-    function (err, result) {
-      if (err) throw err;
-      // console.log(result);
-      if (result.length > 0) {
-        if (bcrypt.compareSync(password, result[0].password)) {
-          req.session.username = result[0].username;
-          req.session.loggedID = result[0].id;
-          res.redirect("/shop");
-        } else {
-          res.render("login", {
-            alert: "Incorrect password",
-          });
-        }
-      } else {
-        con.query(
-          "SELECT * FROM users INNER JOIN deacts ON users.id = deacts.user_id WHERE users.username=? ORDER BY d_id DESC LIMIT 1",
-          [username], function (err, result) {
-            if (err) throw err;
-            res.render("login", { validation: result });
-          });
-      }
+
+  // Kiểm tra nếu username hoặc password bị bỏ trống
+  if (!username || !password) {
+    res.status(401).render("login", {
+      alert: "Please enter full gmail and password",
     });
+  } else {
+    con.query(
+      "SELECT * FROM users WHERE users.username=? AND account_stat = 0",
+      [username],
+      function (err, result) {
+        if (err) throw err;
+        if (result.length > 0) {
+          if (bcrypt.compareSync(password, result[0].password)) {
+            req.session.username = result[0].username;
+            req.session.loggedID = result[0].id;
+
+            res.redirect("/shop");
+          } else {
+            res.status(401).render("login", {
+              alert: "Incorrect password",
+            });
+          }
+        } else {
+          con.query(
+            "SELECT * FROM users INNER JOIN deacts ON users.id = deacts.user_id WHERE users.username=? ORDER BY d_id DESC LIMIT 1",
+            [username], function (err, result) {
+              if (err) throw err;
+              res.status(401).render("login", { validation: result });
+            });
+        }
+      }
+    );
+  }
 };
 //LOG-OUTS CUSTOMER
 exports.logout = (req, res) => {
@@ -669,7 +1052,7 @@ exports.deactivateUser = (req, res) => {
       con.query("SELECT * FROM users", function (err, result) {
         if (err) throw err;
         if (result.length > 0) {
-          res.render("admin/manageUsers", { error: "Please fill-out the reason field.", result: result, users_active: "active" });
+          res.render("admin/manageUsers", { error: " the reason field.", result: result, users_active: "active" });
         }
       });
     }

@@ -104,13 +104,13 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td data-th="Price" style="font-size: 18px;">Php <%= r.prod_price %></td>
+                                            <td data-th="Price" style="font-size: 18px;"><%= r.prod_price %>$</td>
                                             <td data-th="Quantity">
                                                 <form method="POST" >
                                                 <input type="hidden" name="update_cart_id" value="<%= r.cart_id %>">
                                                 <input type="number" name="prod_qty" class="form-control form-control text-center no-spinner" value="<%= r.cqty %>" min="1" max="<%= r.pqty %>">
                                             </td>
-                                            <td data-th="Price" style="font-size: 18px;">Php <%= r.prod_price * r.cqty %></td>
+                                            <td data-th="Price" style="font-size: 18px;"><%= r.prod_price * r.cqty %>$</td>
                                             <% grandtotal+= (r.prod_price * r.cqty) %>
                                             <td class="actions" data-th="">
                                                 <div class="text-right">
@@ -138,7 +138,7 @@
                             </table>
                             <div class="float-right text-right">
                                 <h4>Subtotal:</h4>
-                                <h1>Php <%= grandtotal %></h1>
+                                <h1>Total price: <%= grandtotal %>$</h1>
                             </div>
                         <% } %>
                     <% } %>
