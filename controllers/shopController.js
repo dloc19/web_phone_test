@@ -943,7 +943,6 @@ exports.addCategory = (req, res) => {
       }
     }
   });
-
 };
 exports.manageCategory = (req, res) => {
   con.query("SELECT * FROM categories", function (err, result) {

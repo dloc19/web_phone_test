@@ -37,7 +37,6 @@ shopRouter.get('/api/orders/accepted', shopController.manageAcceptedOrders); // 
 shopRouter.get('/api/orders/pending', shopController.managePendingOrders); // get all accepted products
 shopRouter.get('/api/users', shopController.getUsers); //get all users
 
-
 //USERS
 shopRouter.post('/api/user', shopController.userRegistor); // add a user
 shopRouter.get('/api/orders/user/:userId', shopController.getOrdersByUserId); // lấy thông tin sản phẩm đã order
