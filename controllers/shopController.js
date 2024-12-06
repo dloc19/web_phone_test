@@ -417,7 +417,7 @@ exports.updateProfilePage = (req, res) => {
       if (err) throw err;
 
       if (result.length > 0) {
-        if (bcrypt.compareSync(cur_pwd, result[0].password)) {
+        if (bcrypt.compareSync(cur_pwd, result[0].password)) {// so sánh 2 mk
           // Kiểm tra mật khẩu mới không trùng với mật khẩu cũ
           if (new_pwd === cur_pwd) {
             con.query("SELECT COUNT(cart_id) as total_qty FROM carts WHERE user_id=?", [loggedID], function (err, cresult) {
@@ -428,6 +428,7 @@ exports.updateProfilePage = (req, res) => {
                 cresult: cresult
               });
             });
+            // không đủ kí tự
           } else if (new_pwd.length < 6) {
             con.query("SELECT COUNT(cart_id) as total_qty FROM carts WHERE user_id=?", [loggedID], function (err, cresult) {
               if (err) throw err;
@@ -437,6 +438,7 @@ exports.updateProfilePage = (req, res) => {
                 cresult: cresult
               });
             });
+            //xác nhận mật khẩu mới không trùng khớp
           } else if (new_pwd !== con_new_pwd) {
             con.query("SELECT COUNT(cart_id) as total_qty FROM carts WHERE user_id=?", [loggedID], function (err, cresult) {
               if (err) throw err;
@@ -446,6 +448,7 @@ exports.updateProfilePage = (req, res) => {
                 cresult: cresult
               });
             });
+            //đúng mọi thông tin
           } else {
             bcrypt.hash(new_pwd, saltRounds, function (err, hash) {
               const sql = `UPDATE users SET password=? WHERE id=?`;
@@ -460,7 +463,8 @@ exports.updateProfilePage = (req, res) => {
               });
             });
           }
-        } else {
+        } // sai mật khẩu cũ
+        else {
           con.query("SELECT * FROM users WHERE id=?", [user_id], function (err, result) {
             if (err) throw err;
             con.query("SELECT COUNT(cart_id) as total_qty FROM carts WHERE user_id=?", [loggedID], function (err, cresult) {
@@ -471,6 +475,7 @@ exports.updateProfilePage = (req, res) => {
         }
       }
     });
+  // kiểm tra đăng nhập
   } else if (req.body.user_id && req.body.new_addr) {
     let new_addr = req.body.new_addr;
     let user_id = req.body.user_id;
